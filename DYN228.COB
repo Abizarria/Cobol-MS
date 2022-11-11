@@ -1,0 +1,994 @@
+       IDENTIFICATION  DIVISION.
+       PROGRAM-ID.     DYN228.
+       AUTHOR.         ADILSON.
+
+       ENVIRONMENT     DIVISION.
+       CONFIGURATION   SECTION.
+       SPECIAL-NAMES.
+                       DECIMAL-POINT         IS  COMMA.
+       FILE-CONTROL.
+
+           SELECT      CADCTR        ASSIGN  TO  DISK.
+
+           SELECT      CADEST        ASSIGN  TO  DISK
+                       ORGANIZATION          IS  INDEXED
+                       ACCESS        MODE    IS  DYNAMIC
+                       RECORD        KEY     IS  CHV-EST.
+
+           SELECT      CADLBC        ASSIGN  TO  DISK
+                       ORGANIZATION          IS  INDEXED
+                       ACCESS        MODE    IS  SEQUENTIAL
+                       RECORD        KEY     IS  CHV-LBC.
+
+           SELECT      CADLCP        ASSIGN  TO  DISK
+                       ORGANIZATION          IS  INDEXED
+                       ACCESS        MODE    IS  SEQUENTIAL
+                       RECORD        KEY     IS  CHV-LCP.
+
+           SELECT      CADLDP        ASSIGN  TO  DISK
+                       ORGANIZATION          IS  INDEXED
+                       ACCESS        MODE    IS  SEQUENTIAL
+                       RECORD        KEY     IS  CHV-LDP.
+
+           SELECT      CADLES        ASSIGN  TO  DISK
+                       ORGANIZATION          IS  INDEXED
+                       ACCESS        MODE    IS  SEQUENTIAL
+                       RECORD        KEY     IS  CHV-LES.
+
+           SELECT      CADPRM        ASSIGN  TO  DISK.
+
+           SELECT      CADPRS        ASSIGN  TO  DISK
+                       ORGANIZATION          IS  INDEXED
+                       ACCESS        MODE    IS  SEQUENTIAL
+                       RECORD        KEY     IS  CHV-PRS.
+
+           SELECT      CADSDO        ASSIGN  TO  DISK.
+
+           SELECT      RELATO        ASSIGN  TO  PRINTER.
+
+       DATA            DIVISION.
+       FILE            SECTION.
+
+       FD  CADCTR      LABEL         RECORD  IS  STANDARD
+                       VALUE    OF   FILE-ID     "CADCTR.DAT".
+       01  REG-CTR.
+           03  DIA-CTR          PIC  9(02).
+           03  DTI-CTR          PIC  9(06).
+           03  DTC-CTR          PIC  9(06).
+           03  DTD-CTR          PIC  9(06).
+           03  FAT-CTR          PIC  9(06).
+           03  PCT-CTR          PIC  9(02)V99.
+
+       FD  CADEST      LABEL         RECORD  IS  STANDARD
+                       VALUE    OF   FILE-ID     "CADEST.DAT".
+       01  REG-EST.
+           03  CHV-EST.
+               05  PRX-EST      PIC  9(01).
+               05  SUF-EST      PIC  9(03).
+           03  DES-EST          PIC  X(25).
+           03  MIN-EST          PIC  9(06).
+           03  SDO-EST          PIC S9(06)V9.
+           03  CST-EST          PIC  9(07)V9999.
+           03  CTM-EST          PIC  9(07)V9999.
+           03  VDA-EST          PIC  9(07)V99.
+           03  PCT-EST          PIC S9(03)V99.
+           03  QVM-EST          PIC  9(07)V9.
+           03  QVA-EST          PIC  9(08)V9.
+
+       FD  CADLBC      LABEL         RECORD  IS  STANDARD
+                       VALUE    OF   FILE-ID     "CADLBC.DAT".
+       01  REG-LBC.
+           03  CHV-LBC.
+               05  BCO-LBC      PIC  9(03).
+               05  DTA-LBC      PIC  9(06).
+               05  LCT-LBC      PIC  9(03).
+           03  FLG-LBC          PIC  9(01).
+           03  DOC-LBC          PIC  9(06).
+           03  HST-LBC          PIC  X(20).
+           03  COD-LBC          PIC  9(01).
+           03  VAL-LBC          PIC  9(10)V99.
+
+       FD  CADLCP      LABEL         RECORD  IS  STANDARD
+                       VALUE    OF   FILE-ID     "CADLCP.DAT".
+       01  REG-LCP.
+           03  CHV-LCP.
+               05  PRX-LCP      PIC  9(01).
+               05  SUF-LCP      PIC  9(03).
+               05  DTA-LCP      PIC  9(06).
+               05  LCT-LCP      PIC  9(03).
+           03  NTF-LCP          PIC  9(06).
+           03  QTD-LCP          PIC S9(06).
+           03  CST-LCP          PIC  9(07)V9999.
+
+       FD  CADLDP      LABEL         RECORD  IS  STANDARD
+                       VALUE    OF   FILE-ID     "CADLDP.DAT".
+       01  REG-LDP.
+           03  CHV-LDP.
+               05  PRX-LDP      PIC  9(01).
+               05  SUF-LDP      PIC  9(03).
+               05  DTA-LDP      PIC  9(06).
+               05  LCT-LDP      PIC  9(03).
+           03  FLG-LDP          PIC  9(01).
+           03  PGT-LDP          PIC  9(06).
+           03  HST-LDP          PIC  X(20).
+           03  VAL-LDP          PIC S9(10)V99.
+
+       FD  CADLES      LABEL         RECORD  IS  STANDARD
+                       VALUE    OF   FILE-ID     "CADLES.DAT".
+       01  REG-LES.
+           03  CHV-LES.
+               05  PRX-LES      PIC  9(01).
+               05  SUF-LES      PIC  9(03).
+               05  DTA-LES      PIC  9(06).
+               05  LCT-LES      PIC  9(03).
+           03  SDA-LES          PIC S9(06)V9.
+           03  SDC-LES          PIC  9(06)V9.
+
+       FD  CADPRM      LABEL         RECORD  IS  STANDARD
+                       VALUE    OF   FILE-ID     "CADPRM.DAT".
+       01  REG-PRM.
+           05  COD-PRM          PIC  9(05).
+           05  CLI-PRM          PIC  9(02)  OCCURS  36.
+           05  END-PRM          PIC  9(02)  OCCURS  35.
+           05  CID-PRM          PIC  9(02)  OCCURS  20.
+           05  EST-PRM          PIC  9(02)  OCCURS  02.
+           05  CEP-PRM          PIC  9(08).
+           05  CGC-PRM          PIC  9(14).
+           05  INS-PRM          PIC  9(02)  OCCURS  15.
+
+       FD  CADPRS      LABEL         RECORD  IS  STANDARD
+                       VALUE    OF   FILE-ID     "CADPRS.DAT".
+       01  REG-PRS.
+           03  CHV-PRS.
+               05  TUR-PRS      PIC  9(01).
+               05  CXA-PRS      PIC  9(01).
+               05  ATV-PRS      PIC  9(01).
+               05  LIN-PRS      PIC  9(03).
+           03  DES-PRS          PIC  X(15).
+           03  PRX-PRS          PIC  9(01).
+           03  QTD-PRS          PIC  9(06)V9.
+           03  CTD-PRS          PIC  9(10)V99.
+           03  VDD-PRS          PIC S9(10)V99.
+           03  QTM-PRS          PIC  9(07)V9.
+           03  CTM-PRS          PIC  9(11)V99.
+           03  VDM-PRS          PIC S9(11)V99.
+
+       FD  CADSDO      LABEL         RECORD  IS  STANDARD
+                       VALUE    OF   FILE-ID     "CADSDO.DAT".
+       01  REG-SDO.
+           03  SDA-SDO          PIC  9(10)V99.
+           03  CRD-SDO          PIC S9(11)V99  OCCURS  05.
+
+       FD  RELATO      LABEL         RECORD  IS  OMITTED.
+
+       01  REG-REL              PIC X(137).
+
+       WORKING-STORAGE SECTION.
+
+       01  AUXILIARES.
+           03  IND1             PIC  9(02).
+           03  IND2             PIC  9(02).
+           03  RSP-OPC          PIC  X(01).
+           03  TECLADO          PIC  X(02).
+
+           03  ACM-SDO          PIC S9(12)V99.
+           03  LUC-001          PIC S9(12)V99.
+           03  LUC-002          PIC S9(12)V99.
+           03  TOT-VDA          PIC  9(12)V99.
+
+           03  SUF-AUX.
+               05  SF1-AUX      PIC  9(01).
+               05  FILLER       PIC  9(01).
+               05  SF2-AUX      PIC  9(01).
+
+           03  TAB-TT1.
+               05  FILLER       PIC  X(16)  VALUE  "COMBUSTIVEIS    ".
+               05  FILLER       PIC  X(16)  VALUE  "OUTROS PRODUTOS ".
+               05  FILLER       PIC  X(16)  VALUE  "TOTAL GERAL     ".
+           03  RED-TT1          REDEFINES   TAB-TT1.
+               05  TT1-TAB      PIC  X(16)  OCCURS  03.
+
+           03  NOM-TAB          PIC  X(36).
+           03  RED-NOM          REDEFINES   NOM-TAB.
+               05  LET-NOM      PIC  X(01)  OCCURS  36.
+
+           03  TAB-LET          PIC  X(42)  VALUE
+               "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ ./-&,".
+           03  RED-LET          REDEFINES   TAB-LET.
+               05  LET-TAB      PIC  X(01)  OCCURS  42.
+
+           03  DTA-AUX.
+               05  ANO-AUX      PIC  9(02).
+               05  MES-AUX      PIC  9(02).
+               05  DIA-AUX      PIC  9(02).
+
+           03  COL-TAB               OCCURS  04.
+               05  LIN-TAB           OCCURS  10.
+                   07  DES-TAB  PIC  X(20).
+                   07  QVD-TAB  PIC  9(07)V9.
+                   07  CTM-TAB  PIC  9(12)V99.
+                   07  VDA-TAB  PIC  9(12)V99.
+                   07  QCP-TAB  PIC S9(07)V9.
+                   07  VCP-TAB  PIC S9(12)V99.
+                   07  PGO-TAB  PIC S9(12)V99.
+                   07  PDT-TAB  PIC S9(12)V99.
+                   07  SDA-TAB  PIC S9(07)V9.
+                   07  VLA-TAB  PIC S9(12)V99.
+                   07  QDF-TAB  PIC S9(07)V9.
+                   07  VDF-TAB  PIC S9(12)V99.
+
+           03  DES-001     PIC  X(20)  VALUE  "GANHOS DE CAPITAL   ".
+           03  DES-002     PIC  X(20)  VALUE  "CHEQUES RECUPERADOS ".
+
+           03  TAB-TT2.
+               05  FILLER  PIC  X(23)  VALUE  "TOTAL DOS COMBUSTIVEIS ".
+               05  FILLER  PIC  X(23)  VALUE  "TOTAL OUTROS PRODUTOS  ".
+               05  FILLER  PIC  X(23)  VALUE  "TOTAL DOS SERVICOS     ".
+               05  FILLER  PIC  X(23)  VALUE  "TOTAL FINANCEIRO       ".
+               05  FILLER  PIC  X(23)  VALUE  "TOTAL DAS RECEITAS     ".
+               05  FILLER  PIC  X(23)  VALUE  "LUCRO LIQUIDO          ".
+               05  FILLER  PIC  X(23)  VALUE  "CONTAS A RECEBER       ".
+               05  FILLER  PIC  X(23)  VALUE  "CONTAS A PAGAR         ".
+               05  FILLER  PIC  X(23)  VALUE  "RESULTADO OPERACIONAL  ".
+           03  RED-TT2          REDEFINES  TAB-TT2.
+               05  TT2-TAB      PIC X(23)  OCCURS  09.
+
+           03  TAB-TBD.
+               05  FILLER  PIC  X(55)  VALUE  "OBRIGACOES TRABALHISTAS".
+               05  FILLER  PIC  X(55)  VALUE  "OBRIGACOES FISCAIS     ".
+               05  FILLER  PIC  X(55)  VALUE  "DESPESAS OPERACIONAIS  ".
+               05  FILLER  PIC  X(55)  VALUE  "DESPESAS DE CAPITAL    ".
+               05  FILLER  PIC  X(55)  VALUE  "CREDITOS DOS SOCIOS    ".
+               05  FILLER  PIC  X(55)  VALUE  "CHEQUES DEVOLVIDOS     ".
+               05  FILLER  PIC  X(55)  VALUE  "TOTAL DAS DESPESAS     ".
+           03  RED-TBD          REDEFINES  TAB-TBD.
+               05  REG-TBD      OCCURS  07.
+                   07  DES-TBD  PIC  X(23).
+                   07  QTD-TBD  PIC  9(04).
+                   07  PGO-TBD  PIC S9(12)V99.
+                   07  PDT-TBD  PIC S9(12)V99.
+
+       01  IMP-001.
+           03  FILLER           PIC  9(01)  COMP-0  VALUE  15.
+
+       01  IMP-002.
+           03  FILLER           PIC  9(01)  COMP-0  VALUE  18.
+
+       01  CAB-001.
+           03  FILLER           PIC  X(22)  VALUE  "-DYNAMIC-".
+           03  NOM-CB1          PIC  X(48).
+           03  FILLER           PIC  X(08)  VALUE  "FOLHA :".
+           03  PAG-CB1          PIC  9(02).
+
+       01  CAB-002.
+           03  FILLER           PIC  X(50)  VALUE  "MOVIMENTO MENSAL".
+           03  FILLER           PIC  X(11)  VALUE  "PERIODO DE".
+           03  DDI-CB2          PIC  9(02).
+           03  FILLER           PIC  X(01)  VALUE  "/".
+           03  MMI-CB2          PIC  9(02).
+           03  FILLER           PIC  X(01)  VALUE  "/".
+           03  AAI-CB2          PIC  9(02).
+           03  FILLER           PIC  X(03)  VALUE  " A".
+           03  DDF-CB2          PIC  9(02).
+           03  FILLER           PIC  X(01)  VALUE  "/".
+           03  MMF-CB2          PIC  9(02).
+           03  FILLER           PIC  X(01)  VALUE  "/".
+           03  AAF-CB2          PIC  9(02).
+
+       01  CAB-003              PIC X(137)  VALUE  ALL  "-".
+
+       01  CAB-004.
+           03  FILLER           PIC  X(01)  VALUE  "|".
+           03  FILLER           PIC X(135)  VALUE  ALL  "=".
+           03  FILLER           PIC  X(01)  VALUE  "|".
+
+       01  CAB-005.
+           03  FILLER           PIC  X(01)  VALUE  "|".
+           03  FILLER           PIC X(135)  VALUE  ALL  "-".
+           03  FILLER           PIC  X(01)  VALUE  "|".
+
+       01  CAB-006.
+           03  FILLER           PIC  X(68)  VALUE  "|                  |
+               "    E S T O Q U E    I N I C I A L    |      E S".
+           03  FILLER           PIC  X(69)  VALUE  " T O Q U E    A T U
+               "A L      |     P E R D A S   /   S O B R A S    |".
+
+       01  CAB-007.
+           03  FILLER           PIC  X(68)  VALUE  "|   O R I G E M    |
+               "--------------------------------------|---------".
+           03  FILLER           PIC  X(69)  VALUE  "--------------------
+               "---------|--------------------------------------|".
+
+       01  CAB-008.
+           03  FILLER           PIC  X(68)  VALUE  "|                  |
+               "   QUANTIDADE  |    PRECO DE CUSTO    |   QUANTI".
+           03  FILLER           PIC  X(69)  VALUE  "DADE  |    PRECO DE
+               "CUSTO    |   QUANTIDADE  |    PRECO DE CUSTO    |".
+
+       01  CAB-009.
+           03  FILLER           PIC  X(68)  VALUE  "|                  |
+               "                      V E N D A S               ".
+           03  FILLER           PIC  X(69)  VALUE  "        |
+               "            C O M P R A S                       |".
+
+       01  CAB-010.
+           03  FILLER           PIC  X(68)  VALUE  "|   O R I G E M    |
+               "------------------------------------------------".
+           03  FILLER           PIC  X(69)  VALUE  "--------|-----------
+               "------------------------------------------------|".
+
+       01  CAB-011.
+           03  FILLER           PIC  X(68)  VALUE  "|                  |
+               " QTD. VENDIDA |  VALOR DAS VENDAS  |     CUSTO M".
+           03  FILLER           PIC  X(69)  VALUE  "EDIO    | QTD. COMPR
+               "ADA |      VALOR PAGO     |    VALOR A PAGAR    |".
+
+       01  CAB-012.
+           03  FILLER           PIC  X(68)  VALUE  "|
+               "             |                  |    LUCRO APURA".
+           03  FILLER           PIC  X(69)  VALUE  "DO SOBRE O CUSTO MED
+               "IO    |   LUCRO APURADO SOBRE AS COMPRAS PAGAS  |".
+
+       01  CAB-013.
+           03  FILLER           PIC  X(68)  VALUE  "|          O R I G E
+               " M           |    QUANTIDADE    |---------------".
+           03  FILLER           PIC  X(69)  VALUE  "--------------------
+               "------|-----------------------------------------|".
+
+       01  CAB-014.
+           03  FILLER           PIC  X(68)  VALUE  "|
+               "             |                  |   ( VENDAS - C".
+           03  FILLER           PIC  X(69)  VALUE  "USTOS )   |    MARGE
+               "M %   |   ( VENDAS - COMPRAS )  |    MARGEM %   |".
+
+       01  DET-001.
+           03  FILLER           PIC  X(02)  VALUE  "|".
+           03  DES-DT1          PIC  X(16).
+           03  FILLER           PIC  X(03)  VALUE  " |".
+           03  QTI-DT1          PIC  --.---.--9,9.
+           03  FILLER           PIC  X(04)  VALUE  "  |".
+           03  VLI-DT1          PIC  ----.---.---.--9,99.
+           03  FILLER           PIC  X(04)  VALUE  "  |".
+           03  QTA-DT1          PIC  --.---.--9,9.
+           03  FILLER           PIC  X(04)  VALUE  "  |".
+           03  VLA-DT1          PIC  ----.---.---.--9,99.
+           03  FILLER           PIC  X(04)  VALUE  "  |".
+           03  QTD-DT1          PIC  --.---.--9,9.
+           03  FILLER           PIC  X(04)  VALUE  "  |".
+           03  VLD-DT1          PIC  ----.---.---.--9,99.
+           03  FILLER           PIC  X(03)  VALUE  "  |".
+
+       01  DET-002.
+           03  FILLER           PIC  X(02)  VALUE  "|".
+           03  DES-DT2          PIC  X(16).
+           03  FILLER           PIC  X(04)  VALUE  " |".
+           03  QVD-DT2          PIC  Z.ZZZ.ZZ9,9.
+           03  FILLER           PIC  X(03)  VALUE  " |".
+           03  VVD-DT2          PIC  ZZZ.ZZZ.ZZZ.ZZ9,99.
+           03  FILLER           PIC  X(03)  VALUE  " |".
+           03  CTM-DT2          PIC  ZZZ.ZZZ.ZZZ.ZZ9,99.
+           03  FILLER           PIC  X(04)  VALUE  " |".
+           03  QCP-DT2          PIC  --.---.--9,9.
+           03  FILLER           PIC  X(03)  VALUE  " |".
+           03  PGO-DT2          PIC  ----.---.---.--9,99.
+           03  FILLER           PIC  X(03)  VALUE  " |".
+           03  PDT-DT2          PIC  ----.---.---.--9,99.
+           03  FILLER           PIC  X(02)  VALUE  " |".
+
+       01  DET-003.
+           03  FILLER           PIC  X(04)  VALUE  "|".
+           03  DES-DT3          PIC  X(26).
+           03  FILLER           PIC  X(07)  VALUE  "   |".
+           03  QTD-DT3          PIC  --.---.--9,9  BLANK  WHEN  ZEROS.
+           03  FILLER           PIC  X(07)  VALUE  "   |".
+           03  VL1-DT3          PIC  ----.---.---.--9,99.
+           03  FILLER           PIC  X(07)  VALUE  "   |".
+           03  PC1-DT3          PIC  ---9,99.
+           03  FILLER           PIC  X(09)  VALUE  " %   |".
+           03  VL2-DT3          PIC  ----.---.---.--9,99.
+           03  FILLER           PIC  X(07)  VALUE  "   |".
+           03  PC2-DT3          PIC  ---9,99.
+           03  FILLER           PIC  X(06)  VALUE  " %   |".
+
+       01  PRM-001              PIC  9(01).
+
+       SCREEN          SECTION.
+
+       01  TLA-001.
+           03  LINE 03 COLUMN 01 PIC X(67) FROM
+               " MOVIMENTO MENSAL  -  Ver. 7.00"
+               BACKGROUND-COLOR  02  FOREGROUND-COLOR  00.
+
+       01  TLA-002.
+           03  LINE 09 COLUMN 11 PIC X(58) FROM " 旼컴컴컴컴컴컴컴컴컴컴
+               "컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴커" BACKGROUND-COLOR 04.
+           03  LINE 10 COLUMN 11 PIC X(58) FROM " �
+               "                                 �" BACKGROUND-COLOR 04.
+           03  LINE 10 COLUMN 69 PIC X(02) FROM  SPACES.
+           03  LINE 11 COLUMN 11 PIC X(58) FROM " �  0%.................
+               "....50%....................100%  �" BACKGROUND-COLOR 04.
+           03  LINE 11 COLUMN 69 PIC X(02) FROM  SPACES.
+           03  LINE 12 COLUMN 11 PIC X(58) FROM " �
+               "                                 �" BACKGROUND-COLOR 04.
+           03  LINE 12 COLUMN 69 PIC X(02) FROM  SPACES.
+           03  LINE 13 COLUMN 11 PIC X(58) FROM " �
+               "                                 �" BACKGROUND-COLOR 04.
+           03  LINE 13 COLUMN 69 PIC X(02) FROM  SPACES.
+           03  LINE 14 COLUMN 11 PIC X(58) FROM " 읕컴컴컴컴컴컴컴컴컴컴
+               "컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴켸" BACKGROUND-COLOR 04.
+           03  LINE 14 COLUMN 69 PIC X(02) FROM  SPACES.
+           03  LINE 15 COLUMN 13 PIC X(58) FROM  SPACES.
+
+       01  TLA-003.
+           03  LINE 09 COLUMN 28 PIC X(24) FROM " 旼컴컴컴컴컴컴컴컴컴커
+               BACKGROUND-COLOR  01.
+           03  LINE 10 COLUMN 28 PIC X(24) FROM " �                    �
+               BACKGROUND-COLOR  01.
+           03  LINE 10 COLUMN 52 PIC X(02) FROM  SPACES.
+           03  LINE 11 COLUMN 28 PIC X(24) FROM " �  MOVIMENTO MENSAL  �
+               BACKGROUND-COLOR  01.
+           03  LINE 11 COLUMN 52 PIC X(02) FROM  SPACES.
+           03  LINE 12 COLUMN 28 PIC X(24) FROM " �                    �
+               BACKGROUND-COLOR  01.
+           03  LINE 12 COLUMN 52 PIC X(02) FROM  SPACES.
+           03  LINE 13 COLUMN 28 PIC X(24) FROM " 읕컴컴컴컴컴컴컴컴컴켸
+               BACKGROUND-COLOR  01.
+           03  LINE 13 COLUMN 52 PIC X(02) FROM  SPACES.
+           03  LINE 14 COLUMN 30 PIC X(24) FROM  SPACES.
+
+       01  LPA-001.
+           03  LINE 06 COLUMN 11 PIC X(60) FROM SPACES
+               BACKGROUND-COLOR  07.
+           03  LINE 07 COLUMN 11 PIC X(60) FROM SPACES
+               BACKGROUND-COLOR  07.
+           03  LINE 08 COLUMN 11 PIC X(60) FROM SPACES
+               BACKGROUND-COLOR  07.
+           03  LINE 09 COLUMN 11 PIC X(60) FROM SPACES
+               BACKGROUND-COLOR  07.
+           03  LINE 10 COLUMN 11 PIC X(60) FROM SPACES
+               BACKGROUND-COLOR  07.
+           03  LINE 11 COLUMN 11 PIC X(60) FROM SPACES
+               BACKGROUND-COLOR  07.
+           03  LINE 12 COLUMN 11 PIC X(60) FROM SPACES
+               BACKGROUND-COLOR  07.
+           03  LINE 13 COLUMN 11 PIC X(60) FROM SPACES
+               BACKGROUND-COLOR  07.
+           03  LINE 14 COLUMN 11 PIC X(60) FROM SPACES
+               BACKGROUND-COLOR  07.
+           03  LINE 15 COLUMN 11 PIC X(60) FROM SPACES
+               BACKGROUND-COLOR  07.
+           03  LINE 16 COLUMN 11 PIC X(60) FROM SPACES
+               BACKGROUND-COLOR  07.
+           03  LINE 17 COLUMN 11 PIC X(60) FROM SPACES
+               BACKGROUND-COLOR  07.
+           03  LINE 18 COLUMN 11 PIC X(60) FROM SPACES
+               BACKGROUND-COLOR  07.
+
+       01  COL-001  LINE 12 COLUMN 15 PIC X(10)  FROM  SPACES
+                    BACKGROUND-COLOR  07.
+       01  COL-002  LINE 12 COLUMN 25 PIC X(10)  FROM  SPACES
+                    BACKGROUND-COLOR  07.
+       01  COL-003  LINE 12 COLUMN 35 PIC X(10)  FROM  SPACES
+                    BACKGROUND-COLOR  07.
+       01  COL-004  LINE 12 COLUMN 45 PIC X(10)  FROM  SPACES
+                    BACKGROUND-COLOR  07.
+       01  COL-005  LINE 12 COLUMN 55 PIC X(10)  FROM  SPACES
+                    BACKGROUND-COLOR  07.
+
+       01  MEN-001  LINE 22 COLUMN 14 PIC X(67) FROM "AGUARDE !!!  ACUMU
+                    "LANDO VALORES ...                                "
+                    BACKGROUND-COLOR  05  FOREGROUND-COLOR  15.
+       01  MEN-002  LINE 22 COLUMN 14 PIC X(67) FROM "TECLE [ENTER] P/ I
+                    "MPRIMIR !!!  -  [ESC] RETORNA ...                "
+                    BACKGROUND-COLOR  05  FOREGROUND-COLOR  15.
+       01  MEN-003  LINE 22 COLUMN 14 PIC X(67) FROM "AGUARDE !!!  IMPRI
+                    "MINDO MOVIMENTO MENSAL ...                       "
+                    BACKGROUND-COLOR  05  FOREGROUND-COLOR  15.
+
+       01  OPC-001  LINE 22 COLUMN 80 PIC X(01) USING RSP-OPC  AUTO
+                    BACKGROUND-COLOR  05  FOREGROUND-COLOR  15.
+
+       PROCEDURE       DIVISION  CHAINING  PRM-001.
+
+       ROT-000-000.
+           DISPLAY  LPA-001  TLA-001
+                    TLA-002  MEN-001
+           OPEN     INPUT    CADCTR
+                             CADPRM
+           READ     CADCTR
+           READ     CADPRM
+           MOVE     1        TO  IND1.
+
+       ROT-000-010.
+           MOVE     CLI-PRM (IND1 + 1)  TO IND2
+           MOVE     LET-TAB (IND2)  TO  LET-NOM (IND1)
+           ADD      1   TO   IND1
+           IF  IND1  <  36
+               GO  TO        ROT-000-010.
+           MOVE     SPACES   TO  LET-NOM (IND1)
+           MOVE     NOM-TAB  TO  NOM-CB1
+           MOVE     DTI-CTR  TO  DTA-AUX
+           MOVE     DIA-AUX  TO  DDI-CB2
+           MOVE     MES-AUX  TO  MMI-CB2
+           MOVE     ANO-AUX  TO  AAI-CB2
+           MOVE     DTD-CTR  TO  DTA-AUX
+           MOVE     DIA-AUX  TO  DDF-CB2
+           MOVE     MES-AUX  TO  MMF-CB2
+           MOVE     ANO-AUX  TO  AAF-CB2
+           MOVE     1        TO  IND1     IND2.
+
+       ROT-000-020.
+           MOVE     SPACES   TO  DES-TAB (IND1, IND2)
+           MOVE     ZEROS    TO  QVD-TAB (IND1, IND2)
+                                 CTM-TAB (IND1, IND2)
+                                 VDA-TAB (IND1, IND2)
+                                 QCP-TAB (IND1, IND2)
+                                 VCP-TAB (IND1, IND2)
+                                 PGO-TAB (IND1, IND2)
+                                 PDT-TAB (IND1, IND2)
+                                 SDA-TAB (IND1, IND2)
+                                 VLA-TAB (IND1, IND2)
+                                 QDF-TAB (IND1, IND2)
+                                 VDF-TAB (IND1, IND2)
+           ADD      1        TO  IND2
+           IF  IND2  <  11
+               GO  TO        ROT-000-020.
+           ADD      1        TO  IND1
+           MOVE     1        TO  IND2
+           IF  IND1  <  05
+               GO  TO        ROT-000-020.
+
+       ROT-000-030.
+           MOVE     ZEROS    TO  QTD-TBD (IND2)
+                                 PGO-TBD (IND2)
+                                 PDT-TBD (IND2)
+           ADD      1        TO  IND2
+           IF  IND2    <     08
+               GO  TO        ROT-000-030.
+           MOVE     DES-001  TO  DES-TAB (4, 1)
+           MOVE     DES-002  TO  DES-TAB (4, 2)
+           CLOSE    CADCTR   CADPRM
+           OPEN     INPUT    CADLCP  CADPRS
+           DISPLAY  COL-001.
+
+       ROT-100-000.
+           READ     CADPRS   AT  END
+                    GO  TO   ROT-100-030.
+           IF  ATV-PRS   >   3
+               GO  TO        ROT-100-020.
+           MOVE     PRX-PRS  TO  IND2.
+
+       ROT-100-010.
+           MOVE     ATV-PRS  TO  IND1
+           MOVE     DES-PRS  TO  DES-TAB (IND1, IND2)
+           ADD      QTM-PRS  TO  QVD-TAB (IND1, IND2)
+           ADD      VDM-PRS  TO  VDA-TAB (IND1, IND2)
+           ADD      CTM-PRS  TO  CTM-TAB (IND1, IND2)
+           ADD      QTM-PRS  TO  QVD-TAB (IND1,   10)
+           ADD      VDM-PRS  TO  VDA-TAB (IND1,   10)
+           ADD      CTM-PRS  TO  CTM-TAB (IND1,   10)
+           GO  TO   ROT-100-000.
+
+       ROT-100-020.
+           IF  ATV-PRS   >   4
+               GO  TO        ROT-100-000.
+           IF  PRX-PRS   <   8
+               GO  TO        ROT-100-000.
+           COMPUTE  IND2  =  PRX-PRS  -  5
+           GO  TO            ROT-100-010.
+
+       ROT-100-030.
+           READ     CADLCP   AT  END
+                    GO  TO   ROT-100-040.
+           IF  PRX-LCP   =   0
+               MOVE          1        TO  IND1
+               MOVE          SUF-LCP  TO  IND2
+           ELSE
+               MOVE          2        TO  IND1
+               MOVE          PRX-LCP  TO  IND2.
+           ADD      QTD-LCP  TO  QCP-TAB (IND1, IND2)
+           ADD      QTD-LCP  TO  QCP-TAB (IND1,   10)
+           COMPUTE  VCP-TAB (IND1, IND2)  =
+                    VCP-TAB (IND1, IND2)  +  QTD-LCP  *  CST-LCP
+           COMPUTE  VCP-TAB (IND1,   10)  =
+                    VCP-TAB (IND1,   10)  +  QTD-LCP  *  CST-LCP
+           GO  TO   ROT-100-030.
+
+       ROT-100-040.
+           DISPLAY  COL-002
+           CLOSE    CADPRS   CADLCP
+           OPEN     INPUT    CADEST
+                             CADLES
+           MOVE     SPACES   TO  CHV-EST
+           START    CADEST   KEY GREATER  CHV-EST.
+
+       ROT-100-050.
+           READ     CADEST   NEXT AT END
+                    GO  TO   ROT-100-060.
+           IF  PRX-EST   =   0
+               MOVE          1        TO  IND1
+               MOVE          SUF-EST  TO  IND2
+           ELSE
+               MOVE          2        TO  IND1
+               MOVE          PRX-EST  TO  IND2.
+           COMPUTE  SDA-TAB (IND1, IND2)  =
+                    SDA-TAB (IND1, IND2)  +  SDO-EST
+           COMPUTE  SDA-TAB (IND1,   10)  =
+                    SDA-TAB (IND1,   10)  +  SDO-EST
+           COMPUTE  VLA-TAB (IND1, IND2)  =
+                    VLA-TAB (IND1, IND2)  +  SDO-EST  *  CST-EST
+           COMPUTE  VLA-TAB (IND1,   10)  =
+                    VLA-TAB (IND1,   10)  +  SDO-EST  *  CST-EST
+           GO  TO   ROT-100-050.
+
+       ROT-100-060.
+           READ     CADLES   AT  END
+                    GO  TO   ROT-100-070.
+           IF  PRX-LES   =   0
+               MOVE          1        TO  IND1
+               MOVE          SUF-LES  TO  IND2
+           ELSE
+               MOVE          2        TO  IND1
+               MOVE          PRX-LES  TO  IND2.
+           MOVE     PRX-LES  TO  PRX-EST
+           MOVE     SUF-LES  TO  SUF-EST
+           READ     CADEST
+           COMPUTE  QDF-TAB (IND1, IND2)  =
+                    QDF-TAB (IND1, IND2)  +  (SDC-LES - SDA-LES)
+           COMPUTE  QDF-TAB (IND1,   10)  =
+                    QDF-TAB (IND1,   10)  +  (SDC-LES - SDA-LES)
+           COMPUTE  VDF-TAB (IND1, IND2)  =
+                    VDF-TAB (IND1, IND2)  +
+                    (SDC-LES -  SDA-LES)  *   CST-EST
+           COMPUTE  VDF-TAB (IND1,   10)  =
+                    VDF-TAB (IND1,   10)  +
+                    (SDC-LES -  SDA-LES)  *   CST-EST
+           GO  TO   ROT-100-060.
+
+       ROT-100-070.
+           DISPLAY  COL-003
+           CLOSE    CADEST   CADLES
+           OPEN     INPUT    CADLDP.
+
+       ROT-100-080.
+           READ     CADLDP   AT  END
+                    GO  TO   ROT-100-100.
+           IF  PRX-LDP   >   5
+               GO  TO        ROT-100-090.
+           ADD           1   TO  QTD-TBD (7)
+           ADD           1   TO  QTD-TBD (PRX-LDP)
+           IF  FLG-LDP   =   1
+               ADD  VAL-LDP  TO  PDT-TBD (7)
+               ADD  VAL-LDP  TO  PDT-TBD (PRX-LDP)
+           ELSE
+               ADD  VAL-LDP  TO  PGO-TBD (7)
+               ADD  VAL-LDP  TO  PGO-TBD (PRX-LDP).
+           GO  TO   ROT-100-080.
+
+       ROT-100-090.
+           MOVE     SUF-LDP  TO  SUF-AUX
+           IF  SF1-AUX   =   0
+               MOVE          1        TO  IND1
+               MOVE          SF2-AUX  TO  IND2
+           ELSE
+               MOVE          2        TO  IND1
+               MOVE          SF1-AUX  TO  IND2.
+           IF  FLG-LDP   =   1
+               ADD  VAL-LDP  TO  PDT-TAB (IND1,   10)
+               ADD  VAL-LDP  TO  PDT-TAB (IND1, IND2)
+           ELSE
+               ADD  VAL-LDP  TO  PGO-TAB (IND1,   10)
+               ADD  VAL-LDP  TO  PGO-TAB (IND1, IND2).
+           GO  TO   ROT-100-080.
+
+       ROT-100-100.
+           CLOSE    CADLDP
+           OPEN     INPUT    CADLBC
+           DISPLAY  COL-004.
+
+       ROT-100-110.
+           READ     CADLBC   AT  END
+                    GO  TO   ROT-100-120.
+           IF  COD-LBC   =   3
+               ADD  1        TO  QVD-TAB (4, 01)
+               ADD  1        TO  QVD-TAB (4, 10)
+               ADD  VAL-LBC  TO  VDA-TAB (4, 01)
+               ADD  VAL-LBC  TO  VDA-TAB (4, 10).
+           IF  COD-LBC   =   5
+               ADD  1        TO  QTD-TBD (6)
+               ADD  1        TO  QTD-TBD (7)
+               ADD  VAL-LBC  TO  PGO-TBD (6)
+               ADD  VAL-LBC  TO  PGO-TBD (7).
+           IF  COD-LBC   =   6
+               ADD  1        TO  QVD-TAB (4, 02)
+               ADD  1        TO  QVD-TAB (4, 10)
+               ADD  VAL-LBC  TO  VDA-TAB (4, 02)
+               ADD  VAL-LBC  TO  VDA-TAB (4, 10).
+           GO  TO   ROT-100-110.
+
+       ROT-100-120.
+           CLOSE    CADLBC
+           OPEN     INPUT    CADSDO
+           READ     CADSDO
+           DISPLAY  COL-005  MEN-002
+           MOVE     " "  TO  RSP-OPC.
+
+       ROT-100-130.
+           ACCEPT   OPC-001
+           ACCEPT   TECLADO  FROM ESCAPE  KEY
+           IF  TECLADO   =    01
+               GO  TO        ROT-900-000.
+           OPEN     OUTPUT   RELATO
+           DISPLAY  LPA-001
+                    TLA-003  MEN-003.
+
+       ROT-200-000.
+           MOVE     1        TO  PAG-CB1
+           WRITE    REG-REL FROM CAB-001  AFTER  0
+           WRITE    REG-REL FROM CAB-002  AFTER  2
+           WRITE    REG-REL FROM IMP-001  AFTER  0
+           WRITE    REG-REL FROM CAB-003
+           WRITE    REG-REL FROM CAB-006
+           WRITE    REG-REL FROM CAB-007
+           WRITE    REG-REL FROM CAB-008
+           WRITE    REG-REL FROM CAB-004
+           MOVE     1        TO  IND1     IND2.
+
+       ROT-200-010.
+           MOVE     DES-TAB (IND1, IND2)  TO  DES-DT1
+           COMPUTE  QTI-DT1  =   SDA-TAB (IND1, IND2)
+                             +   QVD-TAB (IND1, IND2)
+                             -   QCP-TAB (IND1, IND2)
+                             -   QDF-TAB (IND1, IND2)
+           COMPUTE  VLI-DT1  =   VLA-TAB (IND1, IND2)
+                             +   CTM-TAB (IND1, IND2)
+                             -   VCP-TAB (IND1, IND2)
+                             -   VDF-TAB (IND1, IND2)
+           MOVE     SDA-TAB (IND1, IND2)  TO  QTA-DT1
+           MOVE     VLA-TAB (IND1, IND2)  TO  VLA-DT1
+           MOVE     QDF-TAB (IND1, IND2)  TO  QTD-DT1
+           MOVE     VDF-TAB (IND1, IND2)  TO  VLD-DT1
+           WRITE    REG-REL FROM DET-001
+           ADD      1   TO  IND2
+           IF  IND2     <    10      AND
+               DES-TAB (IND1, IND2)  NOT  =   SPACES
+               GO  TO        ROT-200-010.
+           MOVE     TT1-TAB (IND1)        TO  DES-DT1
+           COMPUTE  QTI-DT1  =   SDA-TAB (IND1,   10)
+                             +   QVD-TAB (IND1,   10)
+                             -   QCP-TAB (IND1,   10)
+                             -   QDF-TAB (IND1,   10)
+           COMPUTE  VLI-DT1  =   VLA-TAB (IND1,   10)
+                             +   CTM-TAB (IND1,   10)
+                             -   VCP-TAB (IND1,   10)
+                             -   VDF-TAB (IND1,   10)
+           MOVE     SDA-TAB (IND1,   10)  TO  QTA-DT1
+           MOVE     VLA-TAB (IND1,   10)  TO  VLA-DT1
+           MOVE     QDF-TAB (IND1,   10)  TO  QTD-DT1
+           MOVE     VDF-TAB (IND1,   10)  TO  VLD-DT1
+           WRITE    REG-REL FROM CAB-005
+           WRITE    REG-REL FROM DET-001
+           WRITE    REG-REL FROM CAB-004
+           ADD      1        TO  IND1
+           MOVE     1        TO  IND2
+           IF  IND1    <     03
+               GO  TO        ROT-200-010.
+           MOVE     TT1-TAB (IND1)   TO  DES-DT1
+           COMPUTE  QTI-DT1  =  (SDA-TAB (1, 10)  +  SDA-TAB (2, 10))
+                             +  (QVD-TAB (1, 10)  +  QVD-TAB (2, 10))
+                             -  (QCP-TAB (1, 10)  +  QCP-TAB (2, 10))
+                             -  (QDF-TAB (1, 10)  +  QDF-TAB (2, 10))
+           COMPUTE  VLI-DT1  =  (VLA-TAB (1, 10)  +  VLA-TAB (2, 10))
+                             +  (CTM-TAB (1, 10)  +  CTM-TAB (2, 10))
+                             -  (VCP-TAB (1, 10)  +  VCP-TAB (2, 10))
+                             -  (VDF-TAB (1, 10)  +  VDF-TAB (2, 10))
+           COMPUTE  QTA-DT1  =   SDA-TAB (1, 10)  +  SDA-TAB (2, 10)
+           COMPUTE  VLA-DT1  =   VLA-TAB (1, 10)  +  VLA-TAB (2, 10)
+           COMPUTE  QTD-DT1  =   QDF-TAB (1, 10)  +  QDF-TAB (2, 10)
+           COMPUTE  VLD-DT1  =   VDF-TAB (1, 10)  +  VDF-TAB (2, 10)
+           WRITE    REG-REL FROM DET-001
+           WRITE    REG-REL FROM CAB-003
+           WRITE    REG-REL FROM CAB-003  AFTER  2
+           WRITE    REG-REL FROM CAB-009
+           WRITE    REG-REL FROM CAB-010
+           WRITE    REG-REL FROM CAB-011
+           WRITE    REG-REL FROM CAB-004
+           MOVE     1        TO  IND1  IND2.
+
+       ROT-200-020.
+           MOVE     DES-TAB (IND1, IND2)  TO  DES-DT2
+           MOVE     QVD-TAB (IND1, IND2)  TO  QVD-DT2
+           MOVE     VDA-TAB (IND1, IND2)  TO  VVD-DT2
+           MOVE     CTM-TAB (IND1, IND2)  TO  CTM-DT2
+           MOVE     QCP-TAB (IND1, IND2)  TO  QCP-DT2
+           MOVE     PGO-TAB (IND1, IND2)  TO  PGO-DT2
+           MOVE     PDT-TAB (IND1, IND2)  TO  PDT-DT2
+           WRITE    REG-REL FROM DET-002
+           ADD      1   TO  IND2
+           IF  IND2     <    10      AND
+               DES-TAB (IND1, IND2)  NOT  =   SPACES
+               GO  TO        ROT-200-020.
+           MOVE     TT1-TAB (IND1)        TO  DES-DT2
+           MOVE     QVD-TAB (IND1,   10)  TO  QVD-DT2
+           MOVE     VDA-TAB (IND1,   10)  TO  VVD-DT2
+           MOVE     CTM-TAB (IND1,   10)  TO  CTM-DT2
+           MOVE     QCP-TAB (IND1,   10)  TO  QCP-DT2
+           MOVE     PGO-TAB (IND1,   10)  TO  PGO-DT2
+           MOVE     PDT-TAB (IND1,   10)  TO  PDT-DT2
+           WRITE    REG-REL FROM CAB-005
+           WRITE    REG-REL FROM DET-002
+           WRITE    REG-REL FROM CAB-004
+           ADD      1        TO  IND1
+           MOVE     1        TO  IND2
+           IF  IND1   <   3
+               GO  TO        ROT-200-020.
+           MOVE     TT1-TAB (IND1)   TO  DES-DT2
+           COMPUTE  QVD-DT2  =   QVD-TAB (1, 10)  +  QVD-TAB (2, 10)
+           COMPUTE  VVD-DT2  =   VDA-TAB (1, 10)  +  VDA-TAB (2, 10)
+           COMPUTE  CTM-DT2  =   CTM-TAB (1, 10)  +  CTM-TAB (2, 10)
+           COMPUTE  QCP-DT2  =   QCP-TAB (1, 10)  +  QCP-TAB (2, 10)
+           COMPUTE  PGO-DT2  =   PGO-TAB (1, 10)  +  PGO-TAB (2, 10)
+           COMPUTE  PDT-DT2  =   PDT-TAB (1, 10)  +  PDT-TAB (2, 10)
+           WRITE    REG-REL FROM DET-002
+           WRITE    REG-REL FROM CAB-003
+           WRITE    REG-REL FROM IMP-002.
+
+       ROT-300-000.
+           MOVE     2        TO  PAG-CB1
+           WRITE    REG-REL FROM CAB-001  AFTER  PAGE
+           WRITE    REG-REL FROM CAB-002  AFTER  2
+           WRITE    REG-REL FROM IMP-001  AFTER  0
+           WRITE    REG-REL FROM CAB-003
+           WRITE    REG-REL FROM CAB-012
+           WRITE    REG-REL FROM CAB-013
+           WRITE    REG-REL FROM CAB-014
+           WRITE    REG-REL FROM CAB-004
+           MOVE     1        TO  IND1     IND2.
+
+       ROT-300-010.
+           MOVE     DES-TAB (IND1, IND2)  TO  DES-DT3
+           MOVE     QVD-TAB (IND1, IND2)  TO  QTD-DT3
+           COMPUTE  VL1-DT3  =   VDA-TAB (IND1, IND2)
+                             -   CTM-TAB (IND1, IND2)
+           COMPUTE  PC1-DT3  =  (VDA-TAB (IND1, IND2)
+                             -   CTM-TAB (IND1, IND2))
+                    *   100  /   VDA-TAB (IND1, IND2)
+           COMPUTE  VL2-DT3  =   VDA-TAB (IND1, IND2)
+                             -   PGO-TAB (IND1, IND2)
+           COMPUTE  PC2-DT3  =  (VDA-TAB (IND1, IND2)
+                             -   PGO-TAB (IND1, IND2))
+                    *   100  /   VDA-TAB (IND1, IND2)
+           WRITE    REG-REL FROM DET-003
+           ADD      1   TO  IND2
+           IF  IND2     <    10      AND
+               DES-TAB (IND1, IND2)  NOT  =   SPACES
+               GO  TO        ROT-300-010.
+           MOVE     TT2-TAB (IND1)        TO  DES-DT3
+           MOVE     QVD-TAB (IND1,   10)  TO  QTD-DT3
+           COMPUTE  VL1-DT3  =   VDA-TAB (IND1,   10)
+                             -   CTM-TAB (IND1,   10)
+           COMPUTE  PC1-DT3  =  (VDA-TAB (IND1,   10)
+                             -   CTM-TAB (IND1,   10))
+                    *   100  /   VDA-TAB (IND1,   10)
+           COMPUTE  VL2-DT3  =   VDA-TAB (IND1,   10)
+                             -   PGO-TAB (IND1,   10)
+           COMPUTE  PC2-DT3  =  (VDA-TAB (IND1,   10)
+                             -   PGO-TAB (IND1,   10))
+                    *   100  /   VDA-TAB (IND1,   10)
+           WRITE    REG-REL FROM CAB-005
+           WRITE    REG-REL FROM DET-003
+           WRITE    REG-REL FROM CAB-004
+           ADD      1        TO  IND1
+           MOVE     1        TO  IND2
+           IF  IND1   <   5
+               GO  TO        ROT-300-010.
+           MOVE     1        TO  IND1
+           MOVE     ZEROS    TO  TOT-VDA
+                                 LUC-001  LUC-002.
+
+       ROT-300-020.
+           COMPUTE  LUC-001  =   LUC-001
+                             +   VDA-TAB (IND1, 10)
+                             -   CTM-TAB (IND1, 10)
+           COMPUTE  LUC-002  =   LUC-002
+                             +   VDA-TAB (IND1, 10)
+                             -   PGO-TAB (IND1, 10)
+           COMPUTE  TOT-VDA  =   TOT-VDA
+                             +   VDA-TAB (IND1, 10)
+           ADD      1        TO  IND1
+           IF  IND1    <     05
+               GO  TO        ROT-300-020.
+           MOVE     TT2-TAB (IND1)   TO   DES-DT3
+           MOVE     ZEROS    TO  QTD-DT3
+           MOVE     LUC-001  TO  VL1-DT3
+           MOVE     LUC-002  TO  VL2-DT3
+           COMPUTE  PC1-DT3  =   LUC-001
+                    *   100  /   TOT-VDA
+           COMPUTE  PC2-DT3  =   LUC-002
+                    *   100  /   TOT-VDA
+           WRITE    REG-REL FROM DET-003
+           WRITE    REG-REL FROM CAB-004
+           MOVE     1        TO  IND1.
+
+       ROT-300-030.
+           MOVE     DES-TBD (IND1)  TO  DES-DT3
+           MOVE     QTD-TBD (IND1)  TO  QTD-DT3
+           MOVE     PGO-TBD (IND1)  TO  VL1-DT3  VL2-DT3
+           COMPUTE  PC1-DT3  =   PGO-TBD (IND1)
+                             *   100 /  LUC-001
+           COMPUTE  PC2-DT3  =   PGO-TBD (IND1)
+                             *   100 /  LUC-002
+           WRITE    REG-REL FROM DET-003
+           ADD      1        TO  IND1
+           IF  IND1    <     07
+               GO  TO        ROT-300-030.
+           MOVE     DES-TBD (IND1)  TO  DES-DT3
+           MOVE     QTD-TBD (IND1)  TO  QTD-DT3
+           MOVE     PGO-TBD (IND1)  TO  VL1-DT3  VL2-DT3
+           COMPUTE  PC1-DT3  =   PGO-TBD (IND1)
+                             *   100 /  LUC-001
+           COMPUTE  PC2-DT3  =   PGO-TBD (IND1)
+                             *   100 /  LUC-002
+           WRITE    REG-REL FROM CAB-005
+           WRITE    REG-REL FROM DET-003
+           WRITE    REG-REL FROM CAB-004
+           MOVE     TT2-TAB (06) TO  DES-DT3
+           MOVE     ZEROS    TO  QTD-DT3
+           COMPUTE  VL1-DT3  =   LUC-001  -  PGO-TBD (7)
+           COMPUTE  PC1-DT3  =  (LUC-001  -  PGO-TBD (7))
+                             *       100  /  LUC-001
+           COMPUTE  VL2-DT3  =   LUC-002  -  PGO-TBD (7)
+           COMPUTE  PC2-DT3  =  (LUC-002  -  PGO-TBD (7))
+                             *       100  /  LUC-002
+           WRITE    REG-REL FROM DET-003
+           WRITE    REG-REL FROM CAB-004
+           MOVE     TT2-TAB (07) TO  DES-DT3
+           COMPUTE  ACM-SDO  =   CRD-SDO (1)
+                             +   CRD-SDO (2)  +  CRD-SDO (3)
+                             +   CRD-SDO (4)  +  CRD-SDO (5)
+           MOVE     ACM-SDO  TO  VL1-DT3
+                                 VL2-DT3
+           COMPUTE  PC1-DT3  =   ACM-SDO  *  100  /  TOT-VDA
+           COMPUTE  PC2-DT3  =   ACM-SDO  *  100  /  TOT-VDA
+           WRITE    REG-REL FROM DET-003
+           MOVE     TT2-TAB (08) TO  DES-DT3
+           COMPUTE  VL1-DT3  =   PDT-TBD (7)  +   PDT-TAB (1, 10)
+                                              +   PDT-TAB (2, 10)
+           COMPUTE  PC1-DT3  =  (PDT-TBD (7)  +   PDT-TAB (1, 10)
+                                              +   PDT-TAB (2, 10))
+                                              *   100  /  TOT-VDA
+           COMPUTE  VL2-DT3  =   PDT-TBD (7)  +   PDT-TAB (1, 10)
+                                              +   PDT-TAB (2, 10)
+           COMPUTE  PC2-DT3  =  (PDT-TBD (7)  +   PDT-TAB (1, 10)
+                                              +   PDT-TAB (2, 10))
+                                              *   100  /  TOT-VDA
+           WRITE    REG-REL FROM DET-003
+           WRITE    REG-REL FROM CAB-004
+           MOVE     TT2-TAB (09) TO  DES-DT3
+           COMPUTE  VL1-DT3  =   LUC-001  -   PGO-TBD (7)
+                             +   ACM-SDO  -   PDT-TBD (7)
+                                          -   PDT-TAB (1, 10)
+                                          -   PDT-TAB (2, 10)
+           COMPUTE  PC1-DT3  =  (LUC-001  -   PGO-TBD (7)
+                             +   ACM-SDO  -   PDT-TBD (7)
+                                          -   PDT-TAB (1, 10)
+                                          -   PDT-TAB (2, 10))
+                             *   100      /   TOT-VDA
+           COMPUTE  VL2-DT3  =   LUC-002  -   PGO-TBD (7)
+                             +   ACM-SDO  -   PDT-TBD (7)
+                                          -   PDT-TAB (1, 10)
+                                          -   PDT-TAB (2, 10)
+           COMPUTE  PC2-DT3  =  (LUC-002  -   PGO-TBD (7)
+                             +   ACM-SDO  -   PDT-TBD (7)
+                                          -   PDT-TAB (1, 10)
+                                          -   PDT-TAB (2, 10))
+                             *   100      /   TOT-VDA
+           WRITE    REG-REL FROM DET-003
+           WRITE    REG-REL FROM CAB-003
+           WRITE    REG-REL FROM IMP-002  AFTER  0
+           CLOSE    CADSDO
+                    RELATO.
+
+       ROT-900-000.
+           MOVE     6    TO  PRM-001
+           CHAIN   "DYN200"  USING  PRM-001.

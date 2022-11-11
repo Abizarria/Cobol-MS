@@ -1,0 +1,470 @@
+       IDENTIFICATION  DIVISION.
+       PROGRAM-ID.     DYN114.
+       AUTHOR.         ADILSON.
+
+       ENVIRONMENT     DIVISION.
+       CONFIGURATION   SECTION.
+       SPECIAL-NAMES.
+                       DECIMAL-POINT         IS  COMMA.
+       FILE-CONTROL.
+
+           SELECT      CADATV        ASSIGN  TO  DISK
+                       ORGANIZATION          IS  INDEXED
+                       ACCESS        MODE    IS  DYNAMIC
+                       RECORD        KEY     IS  CHV-ATV.
+
+           SELECT      CADEST        ASSIGN  TO  DISK
+                       ORGANIZATION          IS  INDEXED
+                       ACCESS        MODE    IS  DYNAMIC
+                       RECORD        KEY     IS  CHV-EST.
+
+           SELECT      CADPRM        ASSIGN  TO  DISK.
+
+           SELECT      RELATO        ASSIGN  TO  PRINTER.
+
+       DATA            DIVISION.
+       FILE            SECTION.
+
+       FD  CADATV      LABEL         RECORD  IS  STANDARD
+                       VALUE    OF   FILE-ID     "CADATV.DAT".
+       01  REG-ATV.
+           03  CHV-ATV          PIC  9(01).
+           03  DES-ATV          PIC  X(15).
+
+       FD  CADEST      LABEL         RECORD  IS  STANDARD
+                       VALUE    OF   FILE-ID     "CADEST.DAT".
+       01  REG-EST.
+           03  CHV-EST.
+               05  PRX-EST      PIC  9(01).
+               05  SUF-EST      PIC  9(03).
+           03  DES-EST          PIC  X(25).
+           03  MIN-EST          PIC  9(06).
+           03  SDO-EST          PIC S9(06)V9.
+           03  CST-EST          PIC  9(07)V9999.
+           03  CTM-EST          PIC  9(07)V9999.
+           03  VDA-EST          PIC  9(07)V99.
+           03  PCT-EST          PIC S9(03)V99.
+           03  QVM-EST          PIC  9(07)V9.
+           03  QVA-EST          PIC  9(08)V9.
+
+       FD  CADPRM      LABEL         RECORD  IS  STANDARD
+                       VALUE    OF   FILE-ID     "CADPRM.DAT".
+       01  REG-PRM.
+           03  COD-PRM          PIC  9(05).
+           03  CLI-PRM          PIC  9(02)  OCCURS  36.
+           03  END-PRM          PIC  9(02)  OCCURS  35.
+           03  CID-PRM          PIC  9(02)  OCCURS  20.
+           03  EST-PRM          PIC  9(02)  OCCURS  02.
+           03  CEP-PRM          PIC  9(08).
+           03  CGC-PRM          PIC  9(14).
+           03  INS-PRM          PIC  9(02)  OCCURS  15.
+
+       FD  RELATO      LABEL         RECORD  IS  OMITTED.
+
+       01  REG-REL              PIC X(137).
+
+       WORKING-STORAGE SECTION.
+
+       01  AUXILIARES.
+           03  IND1             PIC  9(02).
+           03  IND2             PIC  9(02).
+           03  RSP-OPC          PIC  X(01).
+           03  TECLADO          PIC  9(02).
+           03  ACM-LIN          PIC  9(02).
+           03  ACM-QTD          PIC S9(07)V9.
+           03  ACM-QVM          PIC  9(08)V9.
+           03  ACM-QVA          PIC  9(09)V9.
+           03  ACM-CST          PIC S9(11)V99.
+           03  ACM-CTM          PIC S9(11)V99.
+           03  ACM-VDA          PIC S9(11)V99.
+           03  TOT-CST          PIC S9(11)V99.
+           03  TOT-CTM          PIC S9(11)V99.
+           03  TOT-VDA          PIC S9(11)V99.
+
+           03  NOM-TAB          PIC  X(36).
+           03  RED-NOM          REDEFINES   NOM-TAB.
+               05  LET-NOM      PIC  X(01)  OCCURS  36.
+
+           03  TAB-LET          PIC  X(42)  VALUE
+               "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ ./-&,".
+           03  RED-LET          REDEFINES   TAB-LET.
+               05  LET-TAB      PIC  X(01)  OCCURS  42.
+
+           03  DTA-SYS.
+               05  ANO-SYS      PIC  9(02).
+               05  MES-SYS      PIC  9(02).
+               05  DIA-SYS      PIC  9(02).
+
+       01  CAB-001.
+           03  FILLER           PIC  X(22)  VALUE  "-DYNAMIC-".
+           03  NOM-CB1          PIC  X(48).
+           03  FILLER           PIC  X(08)  VALUE  "FOLHA :".
+           03  PAG-CB1          PIC  9(02).
+
+       01  CAB-002.
+           03  FILLER           PIC  X(36)  VALUE  "RELATORIO COMPLETO".
+           03  ATV-CB2          PIC  X(36).
+           03  DIA-CB2          PIC  9(02).
+           03  FILLER           PIC  X(01)  VALUE  "/".
+           03  MES-CB2          PIC  9(02).
+           03  FILLER           PIC  X(01)  VALUE  "/".
+           03  ANO-CB2          PIC  9(02).
+
+       01  CAB-003.
+           03  FILLER           PIC  9(01)  COMP-0  VALUE  15.
+
+       01  CAB-004              PIC X(137)  VALUE  ALL  "-".
+
+       01  CAB-005.
+           03  FILLER           PIC  X(73)  VALUE  "CODIGO DESCRICAO DO
+               "PRODUTO      CRITICO     SALDO   VENDAS MES   VENDAS".
+           03  FILLER           PIC  X(64)  VALUE  "ANO    PRECO DE CUST
+               "O       CUSTO MEDIO    PRECO DE VENDA    %  ".
+
+       01  CAB-006.
+           03  FILLER           PIC  9(01)  COMP-0  VALUE  18.
+
+       01  DET-001.
+           03  PRX-DT1          PIC  9(01).
+           03  FILLER           PIC  X(01)  VALUE  "-".
+           03  SUF-DT1          PIC  9(03).
+           03  FILLER           PIC  X(02)  VALUE  SPACES.
+           03  DES-DT1          PIC  X(26).
+           03  MIN-DT1          PIC  ZZZ.ZZ9.
+           03  SDO-DT1          PIC  ----.--9,9.
+           03  FILLER           PIC  X(02)  VALUE  SPACES.
+           03  QVM-DT1          PIC  Z.ZZZ.ZZ9,9.
+           03  FILLER           PIC  X(01)  VALUE  SPACES.
+           03  QVA-DT1          PIC  ZZ.ZZZ.ZZ9,9.
+           03  FILLER           PIC  X(04)  VALUE  SPACES.
+           03  CST-DT1          PIC  Z.ZZZ.ZZ9,9999.
+           03  FILLER           PIC  X(04)  VALUE  SPACES.
+           03  CTM-DT1          PIC  Z.ZZZ.ZZ9,9999.
+           03  FILLER           PIC  X(06)  VALUE  SPACES.
+           03  VDA-DT1          PIC  Z.ZZZ.ZZ9,99.
+           03  PCT-DT1          PIC  ---9,99.
+
+       01  TOT-001.
+           03  FILLER           PIC  X(38)  VALUE
+               "       - TOTAL DO GRUPO ........".
+           03  QTD-TT1          PIC  --.---.--9,9.
+           03  FILLER           PIC  X(01)  VALUE  SPACES.
+           03  QVM-TT1          PIC  ZZ.ZZZ.ZZ9,9.
+           03  QVA-TT1          PIC  ZZZ.ZZZ.ZZ9,9.
+           03  CST-TT1          PIC  ---.---.---.--9,99.
+           03  CTM-TT1          PIC  ---.---.---.--9,99.
+           03  VDA-TT1          PIC  ---.---.---.--9,99.
+           03  PCT-TT1          PIC  ---9,99.
+
+       01  TOT-002.
+           03  FILLER           PIC  X(07)  VALUE  SPACES.
+           03  FILLER           PIC  X(14)  VALUE  "- TOTAL GERAL".
+           03  FILLER           PIC  X(55)  VALUE  ALL  ".".
+           03  CST-TT2          PIC  ---.---.---.--9,99.
+           03  CTM-TT2          PIC  ---.---.---.--9,99.
+           03  VDA-TT2          PIC  ---.---.---.--9,99.
+           03  PCT-TT2          PIC  ---9,99.
+
+       01  PRM-001              PIC  9(01).
+
+       SCREEN          SECTION.
+
+       01  TLA-001.
+           03  LINE 03 COLUMN 02 PIC X(66) FROM
+               "RELACAO COMPLETA DO ESTOQUE  -  Ver. 7.11"
+               BACKGROUND-COLOR  02  FOREGROUND-COLOR 00.
+
+       01  TLA-002.
+           03  LINE 09 COLUMN 29 PIC X(21) FROM " ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+               BACKGROUND-COLOR  01.
+           03  LINE 10 COLUMN 29 PIC X(21) FROM " ³                 ³
+               BACKGROUND-COLOR  01.
+           03  LINE 10 COLUMN 50 PIC X(02) FROM SPACES.
+           03  LINE 11 COLUMN 29 PIC X(21) FROM " ³  Relacao Total  ³
+               BACKGROUND-COLOR  01.
+           03  LINE 11 COLUMN 50 PIC X(02) FROM SPACES.
+           03  LINE 12 COLUMN 29 PIC X(21) FROM " ³                 ³
+               BACKGROUND-COLOR  01.
+           03  LINE 12 COLUMN 50 PIC X(02) FROM SPACES.
+           03  LINE 13 COLUMN 29 PIC X(21) FROM " ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+               BACKGROUND-COLOR  01.
+           03  LINE 13 COLUMN 50 PIC X(02) FROM SPACES.
+           03  LINE 14 COLUMN 31 PIC X(21) FROM SPACES.
+
+       01  TLA-003.
+           03  LINE 09 COLUMN 22 PIC X(37) FROM " ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+               "ÄÄÄÄÄÄÄÄÄÄÄÄ¿"   BACKGROUND-COLOR 01.
+           03  LINE 10 COLUMN 22 PIC X(37) FROM " ³
+               "            ³"   BACKGROUND-COLOR 01.
+           03  LINE 10 COLUMN 59 PIC X(02) FROM SPACES.
+           03  LINE 11 COLUMN 22 PIC X(37) FROM " ³  Grupo :    -
+               "            ³"   BACKGROUND-COLOR 01.
+           03  LINE 11 COLUMN 59 PIC X(02) FROM SPACES.
+           03  LINE 12 COLUMN 22 PIC X(37) FROM " ³
+               "            ³"   BACKGROUND-COLOR 01.
+           03  LINE 12 COLUMN 59 PIC X(02) FROM SPACES.
+           03  LINE 13 COLUMN 22 PIC X(37) FROM " ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+               "ÄÄÄÄÄÄÄÄÄÄÄÄÙ"   BACKGROUND-COLOR 01.
+           03  LINE 13 COLUMN 59 PIC X(02) FROM SPACES.
+           03  LINE 14 COLUMN 24 PIC X(37) FROM SPACES.
+
+       01  ENT-001.
+           03  LINE 11 COLUMN 34 PIC 9(01) USING CHV-ATV
+               BACKGROUND-COLOR  01.
+           03  LINE 11 COLUMN 40 PIC X(15) USING DES-ATV
+               BACKGROUND-COLOR  01.
+
+       01  LPA-001.
+           03  LINE 04 COLUMN 01 PIC X(80) FROM SPACES
+               BACKGROUND-COLOR  07.
+           03  LINE 05 COLUMN 01 PIC X(80) FROM SPACES
+               BACKGROUND-COLOR  07.
+           03  LINE 06 COLUMN 01 PIC X(80) FROM SPACES
+               BACKGROUND-COLOR  07.
+           03  LINE 07 COLUMN 01 PIC X(80) FROM SPACES
+               BACKGROUND-COLOR  07.
+           03  LINE 08 COLUMN 01 PIC X(80) FROM SPACES
+               BACKGROUND-COLOR  07.
+           03  LINE 09 COLUMN 01 PIC X(80) FROM SPACES
+               BACKGROUND-COLOR  07.
+           03  LINE 10 COLUMN 01 PIC X(80) FROM SPACES
+               BACKGROUND-COLOR  07.
+           03  LINE 11 COLUMN 01 PIC X(80) FROM SPACES
+               BACKGROUND-COLOR  07.
+           03  LINE 12 COLUMN 01 PIC X(80) FROM SPACES
+               BACKGROUND-COLOR  07.
+           03  LINE 13 COLUMN 01 PIC X(80) FROM SPACES
+               BACKGROUND-COLOR  07.
+           03  LINE 14 COLUMN 01 PIC X(80) FROM SPACES
+               BACKGROUND-COLOR  07.
+           03  LINE 15 COLUMN 01 PIC X(80) FROM SPACES
+               BACKGROUND-COLOR  07.
+           03  LINE 16 COLUMN 01 PIC X(80) FROM SPACES
+               BACKGROUND-COLOR  07.
+           03  LINE 17 COLUMN 01 PIC X(80) FROM SPACES
+               BACKGROUND-COLOR  07.
+           03  LINE 18 COLUMN 01 PIC X(80) FROM SPACES
+               BACKGROUND-COLOR  07.
+           03  LINE 19 COLUMN 01 PIC X(80) FROM SPACES
+               BACKGROUND-COLOR  07.
+           03  LINE 20 COLUMN 01 PIC X(80) FROM SPACES
+               BACKGROUND-COLOR  07.
+           03  LINE 21 COLUMN 01 PIC X(80) FROM SPACES
+               BACKGROUND-COLOR  07.
+
+       01  MEN-001 LINE 22 COLUMN 14 PIC X(67) FROM "TECLE [ENTER] P/ IM
+                   "PRIMIR !!!  -  [ESC] RETORNA ...                "
+                   BACKGROUND-COLOR  05  FOREGROUND-COLOR 15.
+       01  MEN-002 LINE 22 COLUMN 14 PIC X(67) FROM "AGUARDE !!!  IMPRIM
+                   "INDO RELATORIO COMPLETO ...                     "
+                   BACKGROUND-COLOR  05  FOREGROUND-COLOR 15.
+       01  MEN-003 LINE 22 COLUMN 14 PIC X(67) FROM "DIGITE O CODIGO DO
+                   "GRUPO  -  [ESC] RETORNA ...                     "
+                   BACKGROUND-COLOR  05  FOREGROUND-COLOR 15.
+       01  MEN-004 LINE 22 COLUMN 14 PIC X(67) FROM "NAO EXISTE ITENS CA
+                   "DASTRADOS NESTE GRUPO !!!  -  TECLE [ESC] ...   "
+                   BACKGROUND-COLOR  05  FOREGROUND-COLOR 15.
+
+       01  OPC-001 LINE 22 COLUMN 80 PIC X(01) USING RSP-OPC AUTO
+                   BACKGROUND-COLOR  05  FOREGROUND-COLOR 15.
+
+       PROCEDURE       DIVISION  CHAINING  PRM-001.
+
+       ROT-000-000.
+           DISPLAY  TLA-001  LPA-001
+           OPEN     INPUT    CADATV
+                             CADEST  CADPRM
+           READ     CADPRM
+           MOVE     1   TO   IND1.
+
+       ROT-000-010.
+           MOVE     CLI-PRM (IND1 + 1)  TO IND2
+           MOVE     LET-TAB (IND2)  TO  LET-NOM (IND1)
+           ADD      1   TO   IND1
+           IF  IND1  <  36
+               GO  TO        ROT-000-010.
+           MOVE     SPACES   TO  LET-NOM (IND1)
+           ACCEPT   DTA-SYS  FROM   DATE
+           MOVE     12       TO  ANO-SYS
+           IF  MES-SYS   <   12  MOVE 13  TO  ANO-SYS.
+           MOVE     NOM-TAB  TO  NOM-CB1
+           MOVE     DIA-SYS  TO  DIA-CB2
+           MOVE     MES-SYS  TO  MES-CB2
+           MOVE     ANO-SYS  TO  ANO-CB2
+           IF  PRM-001   =   1
+               GO  TO        ROT-100-000.
+           GO  TO   ROT-200-000.
+
+       ROT-000-020.
+           MOVE     5    TO  PRM-001
+           CLOSE    CADATV
+                    CADEST   CADPRM
+           CHAIN   "DYN100"  USING  PRM-001.
+
+       ROT-100-000.
+           DISPLAY  TLA-002  MEN-001
+           MOVE     " "  TO  RSP-OPC
+           ACCEPT   OPC-001
+           ACCEPT   TECLADO  FROM ESCAPE  KEY
+           IF  TECLADO   =   01
+               GO  TO        ROT-000-020.
+           MOVE     SPACES   TO  CHV-EST
+                                 RSP-OPC  ATV-CB2
+           START    CADEST   KEY GREATER  CHV-EST
+           READ     CADEST   NEXT
+           DISPLAY  MEN-002
+           OPEN     OUTPUT   RELATO
+           MOVE     1        TO  PAG-CB1
+           WRITE    REG-REL FROM CAB-001  AFTER  0
+           MOVE     ZEROS    TO  ACM-QTD  ACM-QVM  ACM-QVA
+                                 ACM-CST  ACM-CTM  ACM-VDA
+                                 TOT-CST  TOT-CTM  TOT-VDA.
+       ROT-100-010.
+           WRITE    REG-REL FROM CAB-002  AFTER  2
+           WRITE    REG-REL FROM CAB-003  AFTER  0
+           WRITE    REG-REL FROM CAB-004
+           WRITE    REG-REL FROM CAB-005
+           WRITE    REG-REL FROM CAB-004
+           MOVE     ZEROS    TO  ACM-LIN.
+
+       ROT-100-020.
+           MOVE     PRX-EST  TO  PRX-DT1
+           MOVE     SUF-EST  TO  SUF-DT1
+           MOVE     DES-EST  TO  DES-DT1
+           MOVE     MIN-EST  TO  MIN-DT1
+           MOVE     SDO-EST  TO  SDO-DT1
+           MOVE     QVM-EST  TO  QVM-DT1
+           MOVE     QVA-EST  TO  QVA-DT1
+           MOVE     CST-EST  TO  CST-DT1
+           MOVE     CTM-EST  TO  CTM-DT1
+           MOVE     VDA-EST  TO  VDA-DT1
+           MOVE     PCT-EST  TO  PCT-DT1
+           WRITE    REG-REL FROM DET-001
+           ADD      1        TO  ACM-LIN
+           ADD      SDO-EST  TO  ACM-QTD
+           ADD      QVM-EST  TO  ACM-QVM
+           ADD      QVA-EST  TO  ACM-QVA
+           COMPUTE  ACM-CST  =   ACM-CST  +  SDO-EST  *  CST-EST
+           COMPUTE  ACM-CTM  =   ACM-CTM  +  SDO-EST  *  CTM-EST
+           COMPUTE  ACM-VDA  =   ACM-VDA  +  SDO-EST  *  VDA-EST
+           READ     CADEST   NEXT AT END
+                    GO  TO   ROT-100-030.
+           IF  PRX-EST  NOT  =   PRX-DT1
+               PERFORM       ROT-100-030.
+           IF  ACM-LIN   <   52
+               GO  TO        ROT-100-020.
+           ADD      1        TO  PAG-CB1
+           WRITE    REG-REL FROM CAB-006
+           WRITE    REG-REL FROM CAB-001  AFTER  PAGE
+           MOVE     ZEROS    TO  ACM-LIN
+           GO  TO   ROT-100-010.
+
+       ROT-100-030.
+           MOVE     ACM-QTD  TO  QTD-TT1
+           MOVE     ACM-QVM  TO  QVM-TT1
+           MOVE     ACM-QVA  TO  QVA-TT1
+           MOVE     ACM-CST  TO  CST-TT1
+           MOVE     ACM-CTM  TO  CTM-TT1
+           MOVE     ACM-VDA  TO  VDA-TT1
+           COMPUTE  PCT-TT1  =  (ACM-VDA  -  ACM-CTM) *  100  /  ACM-VDA
+           WRITE    REG-REL FROM TOT-001     AFTER    2
+           MOVE     SPACES   TO  REG-REL
+           WRITE    REG-REL                  AFTER    2
+           ADD      4        TO  ACM-LIN
+           ADD      ACM-CST  TO  TOT-CST
+           ADD      ACM-CTM  TO  TOT-CTM
+           ADD      ACM-VDA  TO  TOT-VDA
+           MOVE     ZEROS    TO  ACM-QTD  ACM-QVM  ACM-QVA
+                                 ACM-CST  ACM-CTM  ACM-VDA.
+       ROT-100-040.
+           MOVE     TOT-CST  TO  CST-TT2
+           MOVE     TOT-CTM  TO  CTM-TT2
+           MOVE     TOT-VDA  TO  VDA-TT2
+           COMPUTE  PCT-TT2  =  (TOT-VDA  -  TOT-CTM) *  100  /  TOT-VDA
+           WRITE    REG-REL FROM TOT-002     AFTER    0
+           WRITE    REG-REL FROM CAB-006
+           CLOSE    RELATO
+           GO  TO   ROT-000-020.
+
+       ROT-200-000.
+           DISPLAY  TLA-003.
+
+       ROT-200-010.
+           DISPLAY  MEN-003
+           MOVE     0   TO   CHV-ATV
+           ACCEPT   (11 34)  CHV-ATV  WITH  UPDATE  AUTO-SKIP
+           ACCEPT            TECLADO  FROM  ESCAPE  KEY
+           IF  TECLADO   =   01
+               GO  TO        ROT-000-020.
+           READ     CADATV   INVALID KEY
+                    GO  TO   ROT-200-010.
+           DISPLAY  ENT-001
+           MOVE     CHV-ATV  TO  PRX-EST
+           MOVE     ZEROS    TO  SUF-EST
+           START    CADEST   KEY GREATER  CHV-EST
+                    INVALID  KEY GO  TO   ROT-200-040.
+           READ     CADEST   NEXT
+           IF  PRX-EST  NOT  =   CHV-ATV
+               GO  TO        ROT-200-040.
+           DISPLAY  MEN-001
+           MOVE     " "  TO  RSP-OPC
+           ACCEPT   OPC-001
+           ACCEPT   TECLADO  FROM ESCAPE  KEY
+           IF  TECLADO   =   01
+               GO  TO        ROT-200-000.
+           MOVE     DES-ATV  TO  ATV-CB2
+           MOVE     SPACES   TO  RSP-OPC
+           DISPLAY  MEN-002
+           OPEN     OUTPUT   RELATO
+           MOVE     1        TO  PAG-CB1
+           WRITE    REG-REL FROM CAB-001  AFTER  0
+           MOVE     ZEROS    TO  ACM-QTD  ACM-QVM  ACM-QVA
+                                 ACM-CST  ACM-CTM  ACM-VDA
+                                 TOT-CST  TOT-CTM  TOT-VDA
+           PERFORM  ROT-100-010.
+
+       ROT-200-020.
+           MOVE     PRX-EST  TO  PRX-DT1
+           MOVE     SUF-EST  TO  SUF-DT1
+           MOVE     DES-EST  TO  DES-DT1
+           MOVE     MIN-EST  TO  MIN-DT1
+           MOVE     SDO-EST  TO  SDO-DT1
+           MOVE     QVM-EST  TO  QVM-DT1
+           MOVE     QVA-EST  TO  QVA-DT1
+           MOVE     CST-EST  TO  CST-DT1
+           MOVE     CTM-EST  TO  CTM-DT1
+           MOVE     VDA-EST  TO  VDA-DT1
+           MOVE     PCT-EST  TO  PCT-DT1
+           WRITE    REG-REL FROM DET-001
+           ADD      1        TO  ACM-LIN
+           ADD      SDO-EST  TO  ACM-QTD
+           ADD      QVM-EST  TO  ACM-QVM
+           ADD      QVA-EST  TO  ACM-QVA
+           COMPUTE  ACM-CST  =   ACM-CST  +  SDO-EST  *  CST-EST
+           COMPUTE  ACM-CTM  =   ACM-CTM  +  SDO-EST  *  CTM-EST
+           COMPUTE  ACM-VDA  =   ACM-VDA  +  SDO-EST  *  VDA-EST
+           READ     CADEST   NEXT AT END
+                    PERFORM  ROT-100-030
+                    GO  TO   ROT-200-030.
+           IF  PRX-EST  NOT  =   CHV-ATV
+               PERFORM       ROT-100-030
+               GO  TO        ROT-200-030.
+           IF  ACM-LIN   <   52
+               GO  TO        ROT-200-020.
+           ADD      1        TO  PAG-CB1
+           WRITE    REG-REL FROM CAB-006
+           WRITE    REG-REL FROM CAB-001  AFTER  PAGE
+           MOVE     ZEROS    TO  ACM-LIN
+           PERFORM  ROT-100-010
+           GO  TO   ROT-200-020.
+
+       ROT-200-030.
+           WRITE    REG-REL FROM CAB-006
+           CLOSE    RELATO
+           GO  TO   ROT-200-000.
+
+       ROT-200-040.
+           MOVE     " " TO  RSP-OPC
+           DISPLAY  MEN-004
+           ACCEPT   OPC-001
+           GO  TO   ROT-200-000.
